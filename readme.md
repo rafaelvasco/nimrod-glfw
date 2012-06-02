@@ -6,7 +6,9 @@ This is a [Nimrod] bind for [GLFW] library. It's highly experimental right now s
 To Run:
 -----------------
 
-Have [Nimrod] installed first. Instructions are [here]. Then just run the included **build.bat** file if you're on Windows. I didn't test it on Linux but it should work just run the same command (inside **build.bat**) in a shell.
+1. Have [Nimrod] installed first. Instructions are [here].
+2. Run `nimrod c glfwtest` on your terminal of choice. Tested on Windows and Linux
+3. Profit !
 
 
 History:
