@@ -224,12 +224,15 @@ type
     TWindowSizeCallback* = proc (width: cint, height: cint){.stdcall.}
     TWindowCloseCallback* = proc (): cint{.stdcall.}
     TWindowRefreshCallback* = proc (){.stdcall.}
-    TMouseButtonCallback* = proc (a: cint, b: cint){.stdcall.}
+    TMouseButtonCallback* = proc (button: cint, status: TKeyAction){.stdcall.}
     TMousePosCallback* = proc (a: cint, b: cint){.stdcall.}
     TMouseWheelCallback* = proc (a: cint){.stdcall.}
-    TKeyCallback* = proc (a: cint, b: cint){.stdcall.}
+    TKeyCallback* = proc (key: cint, status: TKeyAction){.stdcall.}
     TCharCallback* = proc (a: cint, b: cint){.stdcall.}
     TThreadCallback* = proc (a: Pointer){.stdcall.}
+    
+    TKeyAction* {.size: sizeof(cint).} = enum
+      ActionReleased = 0, ActionPressed = 1
 
 ## -----------------------------------------------------------------------------------------
 
@@ -252,7 +255,9 @@ proc GetVersion*(major: ptr cint, minor: ptr cint, rev: ptr cint){.stdcall, impo
 
 ## Window handling
 ## --------------------------------------------------------------------------
-proc OpenWindow*(width: cint, height: cint, redbits: cint, greenbits: cint, bluebits: cint, alphabits: cint, depthbits: cint, stencilbits: cint, mode: cint): cint {.stdcall, importc: "glfwOpenWindow", dynlib: LibName.}
+proc OpenWindow*(width, height: cint, redbits, greenbits, bluebits, alphabits: cint, 
+  depthbits, stencilBits, mode: cint): cint {.stdcall, 
+  importc: "glfwOpenWindow", dynlib: LibName.}
 
 proc OpenWindowHint*(target: cint, hint: cint){.stdcall, importc: "glfwOpenWindowHint", dynlib: LibName.}
 

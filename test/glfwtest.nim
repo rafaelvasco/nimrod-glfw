@@ -27,9 +27,10 @@ proc Initialize() =
     if Init() == 0:
         write(stdout, "Could not initialize GLFW! \n")
 
-    if OpenWindow(windowW, windowH, 0, 0, 0, 0, 0, 0, GLFW_WINDOW) == 0:
+    if OpenWindow(windowW.cint, windowH.cint, 0, 0, 0, 0, 0, 0, GLFW_WINDOW) == 0:
         Terminate()
-
+    
+    opengl.loadExtensions()
 
     SwapInterval(1)
 
