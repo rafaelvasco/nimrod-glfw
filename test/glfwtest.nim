@@ -1,5 +1,5 @@
 import glfw
-import opengl ## TODO: Maybe import opengl in glfw ?
+import opengl
 import strutils
 
 
@@ -17,22 +17,22 @@ var
     y: float = 0.0
     vx: float = 200.0
     vy: float = 200.0
-    windowW: int = 640
-    windowH: int = 480
+    windowW: cint = 640
+    windowH: cint = 480
 
 ## -------------------------------------------------------------------------------
 
 proc Initialize() =
     
-    if Init() == 0:
+    if glfwInit() == 0:
         write(stdout, "Could not initialize GLFW! \n")
 
-    if OpenWindow(windowW.cint, windowH.cint, 0, 0, 0, 0, 0, 0, GLFW_WINDOW) == 0:
-        Terminate()
-    
+    if glfwOpenWindow(windowW.cint, windowH.cint, 0, 0, 0, 0, 0, 0, GLFW_WINDOW) == 0:
+        glfwTerminate()
+
     opengl.loadExtensions()
 
-    SwapInterval(1)
+    glfwSwapInterval(0)
 
     glClearColor(0.1,0.1,0.1,1.0)
     glClearDepth(1.0)
@@ -48,14 +48,14 @@ proc Initialize() =
 
     glOrtho(0.0, float(windowW), float(windowH), 0.0, 0.0, 1.0)
 
-    lastTime = GetTime()
+    lastTime = glfwGetTime()
     lastFPSTime = lastTime
 
 ## -------------------------------------------------------------------------------
 
 proc Update() =
     
-    currentTime = GetTime()
+    currentTime = glfwGetTime()
 
     frameDelta = currentTime - lastTime
 
@@ -63,7 +63,7 @@ proc Update() =
 
     if currentTime - lastFPSTime > 1.0:
         frameRate = int(float(frameCount) / (currentTime - lastFPSTime))
-        SetWindowTitle("FPS: $1" % intToStr(frameRate))
+        glfwSetWindowTitle("FPS: $1" % intToStr(frameRate))
         
         lastFPSTime = currentTime
         frameCount = 0
@@ -121,7 +121,7 @@ proc Render() =
 
     glEnd()
 
-    SwapBuffers()
+    glfwSwapBuffers()
 
 
 
@@ -130,13 +130,13 @@ proc Render() =
 proc Run() =
     
     while running:
-    
+
         Update()
 
         Render()
 
-        running = GetKey(GLFW_KEY_ESC) == GLFW_RELEASE and 
-                  GetWindowParam(GLFW_OPENED) == GL_TRUE
+        running = glfwGetKey(GLFW_KEY_ESC) == GLFW_RELEASE and 
+                  glfwGetWindowParam(GLFW_OPENED) == GL_TRUE
 
 
 ## ==============================================================================
@@ -145,4 +145,4 @@ Initialize()
 
 Run()
 
-Terminate()
+glfwTerminate()

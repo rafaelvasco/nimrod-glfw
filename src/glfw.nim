@@ -1,7 +1,7 @@
 ##==============================================================================
-## GLFW3 Binding for Nimrod
+## GLFW 2.7.8 Binding for Nimrod
 ## Author: Rafael Vasco
-## Version: 1.0
+## Version: 1.1
 ##==============================================================================
 
 
@@ -21,13 +21,27 @@ else:
 ## TYPES 
 ##------------------------------------------------------------------------------
 
+## GLFW Version
+
 const
     GLFW_VERSION_MAJOR* = 2'i8
     GLFW_VERSION_MINOR* = 7'i8
-    GLFW_VERSION_REVISION* = 5'i8
+    GLFW_VERSION_REVISION* = 8'i8
+    
+
+
+## -----------------------------------------------------------------------------
+## Input handling definitions
+
+## Key and button state/action definitions
+
+const
     GLFW_RELEASE* = 0'i8
     GLFW_PRESS* = 1'i8
 
+## Keyboard key definitions: 8-bit ISO-8859-1 (Latin 1) encoding is used
+## for printable keys (such as A-Z, 0-9 etc), and values above 256
+## represent special (non-printable) keys (e.g. F1, Page Up etc).
 
 const
     GLFW_KEY_UNKNOWN* =          -1
@@ -105,6 +119,8 @@ const
     GLFW_KEY_LAST* =            GLFW_KEY_MENU
 
 
+## Mouse button definitions ----------------------------------------------------
+
 const
     GLFW_MOUSE_BUTTON_1* =     0
     GLFW_MOUSE_BUTTON_2* =      1
@@ -114,10 +130,18 @@ const
     GLFW_MOUSE_BUTTON_6* =      5
     GLFW_MOUSE_BUTTON_7* =      6
     GLFW_MOUSE_BUTTON_8* =      7
+
+## Mouse button aliases
+
+const
     GLFW_MOUSE_BUTTON_LAST* =   GLFW_MOUSE_BUTTON_8
     GLFW_MOUSE_BUTTON_LEFT* =   GLFW_MOUSE_BUTTON_1
     GLFW_MOUSE_BUTTON_RIGHT* =  GLFW_MOUSE_BUTTON_2
     GLFW_MOUSE_BUTTON_MIDDLE* = GLFW_MOUSE_BUTTON_3
+
+
+
+## Joystick identifiers --------------------------------------------------------
 
 const
     GLFW_JOYSTICK_1* =         0
@@ -138,11 +162,21 @@ const
     GLFW_JOYSTICK_16* =        15
     GLFW_JOYSTICK_LAST* =      GLFW_JOYSTICK_16
 
+## Other definitions -----------------------------------------------------------
+
 
 
 const
+
+    #glfwOpenWindow modes
+    ## ------------------------------------------
     GLFW_WINDOW* =                  0x00010001
     GLFW_FULLSCREEN* =              0x00010002
+
+
+    ## glfwGetWindowParam tokens
+    ## ------------------------------------------
+
     GLFW_OPENED* =                  0x00020001
     GLFW_ACTIVE* =                  0x00020002
     GLFW_ICONIFIED* =               0x00020003
@@ -153,6 +187,12 @@ const
     GLFW_ALPHA_BITS* =              0x00020008
     GLFW_DEPTH_BITS* =              0x00020009
     GLFW_STENCIL_BITS* =            0x0002000A
+
+
+    ## The following constants are used for both glfwGetWindowParam
+    ## and glfwOpenWindowHint
+    ## ------------------------------------------
+
     GLFW_REFRESH_RATE* =            0x0002000B
     GLFW_ACCUM_RED_BITS* =          0x0002000C
     GLFW_ACCUM_GREEN_BITS* =        0x0002000D
@@ -167,42 +207,73 @@ const
     GLFW_OPENGL_FORWARD_COMPAT* =   0x00020016
     GLFW_OPENGL_DEBUG_CONTEXT* =    0x00020017
     GLFW_OPENGL_PROFILE* =          0x00020018
+
+    ## GLFW_OPENGL_PROFILE tokens
+    ## -----------------------------------------
+
     GLFW_OPENGL_CORE_PROFILE* =     0x00050001
     GLFW_OPENGL_COMPAT_PROFILE* =   0x00050002
+
+    ## glfwEnable/glfwDisable tokens
+    ## -----------------------------------------
+
     GLFW_MOUSE_CURSOR* =            0x00030001
     GLFW_STICKY_KEYS* =             0x00030002
     GLFW_STICKY_MOUSE_BUTTONS* =    0x00030003
     GLFW_SYSTEM_KEYS* =             0x00030004
     GLFW_KEY_REPEAT* =              0x00030005
     GLFW_AUTO_POLL_EVENTS* =        0x00030006
+
+    ## glfwWaitThread wait modes    
+    ##  -----------------------------------------
+
     GLFW_WAIT* =                    0x00040001
     GLFW_NOWAIT* =                  0x00040002
+
+    ## glfwGetJoystickParam tokens
+    ##  -----------------------------------------
+
     GLFW_PRESENT* =                 0x00050001
     GLFW_AXES* =                    0x00050002
     GLFW_BUTTONS* =                 0x00050003
+
+
+    ## glfwReadImage/glfwLoadTexture2D flags
+    ##  -----------------------------------------
+
     GLFW_NO_RESCALE_BIT* =          0x00000001 
     GLFW_ORIGIN_UL_BIT* =           0x00000002
     GLFW_BUILD_MIPMAPS_BIT* =       0x00000004 
     GLFW_ALPHA_MAP_BIT* =           0x00000008
+
+    ## ------------------------------------------
+
+    ## Time spans longer than this (seconds) are considered to be infinity
     GLFW_INFINITY* =                100000.0
 
 
+## -----------------------------------------------------------------------------
+## Typedefs
+## -----------------------------------------------------------------------------
+
 type
+
     PUChar* = ptr cchar   
 
+    ## The video mode structure used by glfwGetVideoModes()
 
-    PVideoMode* = ptr TVideoMode
-    TVideoMode*{.final.} = object
+    PGlfwVideoMode* = ptr TGlfwVideoMode
+    TGlfwVideoMode*{.final.} = object
         width*: cint
         height*: cint
         redBits*: cint
         blueBits*: cint
         greenBits*: cint
 
+    ## Image/texture information
 
-
-    PImage* = ptr TImage
-    TImage*{.final.} = object
+    PGlfwImage* = ptr TGlfwImage
+    TGlfwImage*{.final.} = object
         width*: cint
         height*: cint
         format*: cint
@@ -216,215 +287,216 @@ type
     TGlfwCond* = Pointer
 
 
-## ----- CALLBACKS -------------------------------------------------------------------------
+## ----- CALLBACKS -------------------------------------------------------------
 
 
 type
     
-    TWindowSizeCallback* = proc (width: cint, height: cint){.stdcall.}
-    TWindowCloseCallback* = proc (): cint{.stdcall.}
-    TWindowRefreshCallback* = proc (){.stdcall.}
-    TMouseButtonCallback* = proc (button: cint, status: TKeyAction){.stdcall.}
-    TMousePosCallback* = proc (a: cint, b: cint){.stdcall.}
-    TMouseWheelCallback* = proc (a: cint){.stdcall.}
-    TKeyCallback* = proc (key: cint, status: TKeyAction){.stdcall.}
-    TCharCallback* = proc (a: cint, b: cint){.stdcall.}
-    TThreadCallback* = proc (a: Pointer){.stdcall.}
-    
-    TKeyAction* {.size: sizeof(cint).} = enum
-      ActionReleased = 0, ActionPressed = 1
+    TGlfwWindowSizeCallback* = proc (width: cint, height: cint){.stdcall.}
+    TGlfwWindowCloseCallback* = proc (): cint{.stdcall.}
+    TGlfwWindowRefreshCallback* = proc (){.stdcall.}
+    TGlfwMouseButtonCallback* = proc (button: cint, status: cint){.stdcall.}
+    TGlfwMousePosCallback* = proc (a: cint, b: cint){.stdcall.}
+    TGlfwMouseWheelCallback* = proc (a: cint){.stdcall.}
+    TGlfwKeyCallback* = proc (key: cint, status: int): cint{.stdcall.}
+    TGlfwCharCallback* = proc (a: cint, b: cint){.stdcall.}
+    TGlfwThreadCallback* = proc (a: Pointer){.stdcall.}
 
-## -----------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 
-##=====================================================================================
+
+
+
+## -----------------------------------------------------------------------------
 ## PROCEDURES
-##=====================================================================================
+## -----------------------------------------------------------------------------
 
 
-## ---------------------------------------------------------------------------
 ## GLFW initialization, termination and version querying
+## ----------------------------------------------------------------------------
+
+proc glfwInit*(): cint{.stdcall, importc: "glfwInit", dynlib: LibName.}
+
+proc glfwTerminate*(){.stdcall, importc: "glfwTerminate", dynlib: LibName.}
+
+proc glfwGetVersion*(major: ptr cint, minor: ptr cint, rev: ptr cint){.stdcall, importc: "glfwGetVersion", dynlib: LibName.}
+
 ## ---------------------------------------------------------------------------
-proc Init*(): cint{.stdcall, importc: "glfwInit", dynlib: LibName.}
-
-proc Terminate*(){.stdcall, importc: "glfwTerminate", dynlib: LibName.}
-
-proc GetVersion*(major: ptr cint, minor: ptr cint, rev: ptr cint){.stdcall, importc: "glfwGetVersion", dynlib: LibName.}
 
 
-## ---------------------------------------------------------------------------
+
 
 ## Window handling
 ## --------------------------------------------------------------------------
-proc OpenWindow*(width, height: cint, redbits, greenbits, bluebits, alphabits: cint, 
-  depthbits, stencilBits, mode: cint): cint {.stdcall, 
-  importc: "glfwOpenWindow", dynlib: LibName.}
+proc glfwOpenWindow*(width, height, redbits, greenbits, bluebits, alphabits, depthbits, stencilBits, mode: cint): cint {.stdcall, importc: "glfwOpenWindow", dynlib: LibName.}
 
-proc OpenWindowHint*(target: cint, hint: cint){.stdcall, importc: "glfwOpenWindowHint", dynlib: LibName.}
+proc glfwOpenWindowHint*(target: cint, hint: cint){.stdcall, importc: "glfwOpenWindowHint", dynlib: LibName.}
 
-proc CloseWindow*() {.stdcall, importc: "glfwCloseWindow", dynlib: LibName.}
+proc glfwCloseWindow*() {.stdcall, importc: "glfwCloseWindow", dynlib: LibName.}
 
-proc SetWindowTitle*(title: cstring) {.stdcall, importc: "glfwSetWindowTitle", dynlib: LibName.}
+proc glfwSetWindowTitle*(title: cstring) {.stdcall, importc: "glfwSetWindowTitle", dynlib: LibName.}
 
-proc GetWindowSize*(width: ptr cint, height: ptr cint) {.stdcall, importc: "glfwGetWindowSize", dynlib: LibName.}
+proc glfwGetWindowSize*(width: ptr cint, height: ptr cint) {.stdcall, importc: "glfwGetWindowSize", dynlib: LibName.}
 
-proc SetWindowPos*(x: cint, y: cint) {.stdcall, importc: "glfwSetWindowPos", dynlib: LibName.}
+proc glfwSetWindowSize*(width, height : cint) {.stdcall, importc: "glfwSetWindowSize", dynlib: LibName.}
 
-proc IconifyWindow*() {.stdcall, importc: "glfwIconifyWindow", dynlib: LibName.}
+proc glfwSetWindowPos*(x: cint, y: cint) {.stdcall, importc: "glfwSetWindowPos", dynlib: LibName.}
 
-proc RestoreWindow*() {.stdcall, importc: "glfwRestoreWindow", dynlib: LibName.}
+proc glfwIconifyWindow*() {.stdcall, importc: "glfwIconifyWindow", dynlib: LibName.}
 
-proc SwapBuffers*() {.stdcall, importc: "glfwSwapBuffers", dynlib: LibName.}
+proc glfwRestoreWindow*() {.stdcall, importc: "glfwRestoreWindow", dynlib: LibName.}
 
-proc SwapInterval*(interval: cint) {.stdcall, importc: "glfwSwapInterval", dynlib: LibName.}
+proc glfwSwapBuffers*() {.stdcall, importc: "glfwSwapBuffers", dynlib: LibName.}
 
-proc GetWindowParam*(param: cint): cint {.stdcall, importc: "glfwGetWindowParam", dynlib: LibName.}
+proc glfwSwapInterval*(interval: cint) {.stdcall, importc: "glfwSwapInterval", dynlib: LibName.}
 
-proc SetWindowSizeCallback*(callback: TWindowSizeCallback) {.stdcall, importc: "glfwSetWindowSizeCallback", dynlib: LibName.}
+proc glfwGetWindowParam*(param: cint): cint {.stdcall, importc: "glfwGetWindowParam", dynlib: LibName.}
 
-proc SetWindowCloseCallback*(callback: TWindowCloseCallback) {.stdcall, importc: "glfwSetWindowCloseCallback", dynlib: LibName.}
+proc glfwSetWindowSizeCallback*(callback: TGlfwWindowSizeCallback) {.stdcall, importc: "glfwSetWindowSizeCallback", dynlib: LibName.}
 
-proc SetWindowRefreshCallback*(callback: TWindowRefreshCallback) {.stdcall, importc: "glfwSetWindowRefreshCallback", dynlib: LibName.}
-## ---------------------------------------------------------------------------
+proc glfwSetWindowCloseCallback*(callback: TGlfwWindowCloseCallback) {.stdcall, importc: "glfwSetWindowCloseCallback", dynlib: LibName.}
+
+proc glfwSetWindowRefreshCallback*(callback: TGlfwWindowRefreshCallback) {.stdcall, importc: "glfwSetWindowRefreshCallback", dynlib: LibName.}
+
+
+
 
 ## Video mode functions
-## ---------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 
-proc GetVideoModes*(list: PVideoMode, maxcount: cint): cint {.stdcall, importc: "glfwGetVideoModes", dynlib: LibName.}
+proc glfwGetVideoModes*(list: PGlfwVideoMode, maxcount: cint): cint {.stdcall, importc: "glfwGetVideoModes", dynlib: LibName.}
 
-proc GetDesktopMode*(mode: PVideoMode) {.stdcall, importc: "glfwGetDesktopMode", dynlib: LibName.}
+proc glfwGetDesktopMode*(mode: PGlfwVideoMode) {.stdcall, importc: "glfwGetDesktopMode", dynlib: LibName.}
 
-## ---------------------------------------------------------------------------
+
+
 
 ## Input handling
+## ----------------------------------------------------------------------------
 
-## ---------------------------------------------------------------------------
+proc glfwPollEvents*() {.stdcall, importc: "glfwPollEvents", dynlib: LibName.}
 
-proc PollEvents*() {.stdcall, importc: "glfwPollEvents", dynlib: LibName.}
+proc glfwWaitEvents*() {.stdcall, importc: "glfwWaitEvents", dynlib: LibName.}
 
-proc WaitEvents*() {.stdcall, importc: "glfwWaitEvents", dynlib: LibName.}
+proc glfwGetKey*(key: cint): cint {.stdcall, importc: "glfwGetKey", dynlib: LibName.}
 
-proc GetKey*(key: cint): cint {.stdcall, importc: "glfwGetKey", dynlib: LibName.}
+proc glfwGetMouseButton*(button: cint): cint {.stdcall, importc: "glfwGetMouseButton", dynlib: LibName.}
 
-proc GetMouseButton*(button: cint): cint {.stdcall, importc: "glfwGetMouseButton", dynlib: LibName.}
+proc glfwGetMousePos*(xpos: ptr cint, ypos: ptr cint) {.stdcall, importc: "glfwGetMousePos", dynlib: LibName.}
 
-proc GetMousePos*(xpos: ptr cint, ypos: ptr cint) {.stdcall, importc: "glfwGetMousePos", dynlib: LibName.}
+proc glfwSetMousePos*(xpos: cint, ypos: cint) {.stdcall, importc: "glfwSetMousePos", dynlib: LibName.}
 
-proc SetMousePos*(xpos: cint, ypos: cint) {.stdcall, importc: "glfwSetMousePos", dynlib: LibName.}
+proc glfwGetMouseWheel*(): cint {.stdcall, importc: "glfwGetMouseWheel", dynlib: LibName.}
 
-proc GetMouseWheel*(): cint {.stdcall, importc: "glfwGetMouseWheel", dynlib: LibName.}
+proc glfwSetMouseWheel*(pos: cint) {.stdcall, importc: "glfwSetMouseWheel", dynlib: LibName.}
 
-proc SetMouseWheel*(pos: cint) {.stdcall, importc: "glfwSetMouseWheel", dynlib: LibName.}
+proc glfwSetKeyCallback*(callback: TGlfwKeyCallback) {.stdcall, importc: "glfwSetKeyCallback", dynlib: LibName.}
 
-proc SetKeyCallback*(callback: TKeyCallback) {.stdcall, importc: "glfwSetKeyCallback", dynlib: LibName.}
+proc glfwSetCharCallback*(callback: TGlfwCharCallback) {.stdcall, importc: "glfwSetCharCallback", dynlib: LibName.}
 
-proc SetCharCallback*(callback: TCharCallback) {.stdcall, importc: "glfwSetCharCallback", dynlib: LibName.}
+proc glfwSetMouseButtonCallback*(callback: TGlfwMouseButtonCallback) {.stdcall, importc: "glfwSetMouseButtonCallback", dynlib: LibName.}
 
-proc SetMouseButtonCallback*(callback: TMouseButtonCallback) {.stdcall, importc: "glfwSetMouseButtonCallback", dynlib: LibName.}
+proc glfwSetMousePosCallback*(callback: TGlfwMousePosCallback) {.stdcall, importc: "glfwSetMousePosCallback", dynlib: LibName.}
 
-proc SetMousePosCallback*(callback: TMousePosCallback) {.stdcall, importc: "glfwSetMousePosCallback", dynlib: LibName.}
+proc glfwSetMouseWheelCallback*(callback: TGlfwMouseWheelCallback) {.stdcall, importc: "glfwSetMouseWheelCallback", dynlib: LibName.}
 
-proc SetMouseWheelCallback*(callback: TMouseWheelCallback) {.stdcall, importc: "glfwSetMouseWheelCallback", dynlib: LibName.}
 
-## ---------------------------------------------------------------------------
+
 
 ## Joystick input
+## -----------------------------------------------------------------------------
 
-## ---------------------------------------------------------------------------
+proc glfwGetJoystickParam*(joy: cint, param: cint): cint {.stdcall, importc: "glfwGetJoystickParam", dynlib: LibName.}
 
-proc GetJoystickParam*(joy: cint, param: cint): cint {.stdcall, importc: "glfwGetJoystickParam", dynlib: LibName.}
+proc glfwGetJoystickPos*(joy: cint, pos: ptr float, numaxes: cint): cint {.stdcall, importc: "glfwGetJoystickPos", dynlib: LibName.}
 
-proc GetJoystickPos*(joy: cint, pos: ptr float, numaxes: cint): cint {.stdcall, importc: "glfwGetJoystickPos", dynlib: LibName.}
-
-proc GetJoystickButtons*(joy: cint, buttons: PUChar, numButtons: cint): cint {.stdcall, importc: "glfwGetJoystickButtons", dynlib: LibName.}
-
+proc glfwGetJoystickButtons*(joy: cint, buttons: PUChar, numButtons: cint): cint {.stdcall, importc: "glfwGetJoystickButtons", dynlib: LibName.}
 
 
-## ---------------------------------------------------------------------------
+
 
 
 ## Time
-
 ## ---------------------------------------------------------------------------
 
-proc GetTime*(): cdouble {.stdcall, importc: "glfwGetTime", dynlib: LibName.}
+proc glfwGetTime*(): cdouble {.stdcall, importc: "glfwGetTime", dynlib: LibName.}
 
-proc SetTime*(time: cdouble) {.stdcall, importc: "glfwSetTime", dynlib: LibName.}
+proc glfwSetTime*(time: cdouble) {.stdcall, importc: "glfwSetTime", dynlib: LibName.}
 
-proc Sleep*(time: cdouble) {.stdcall, importc: "glfwSleep", dynlib: LibName.}
+proc glfwSleep*(time: cdouble) {.stdcall, importc: "glfwSleep", dynlib: LibName.}
 
-## ---------------------------------------------------------------------------
+
+
 
 ## Extension support
-
 ## ---------------------------------------------------------------------------
 
-proc ExtensionSupported*(extension: cstring): cint {.stdcall, importc: "glfwExtensionSupported", dynlib: LibName.}
+proc glfwExtensionSupported*(extension: cstring): cint {.stdcall, importc: "glfwExtensionSupported", dynlib: LibName.}
 
-proc GetProcAddress*(procname: cstring): Pointer {.stdcall, importc: "glfwGetProcAddress", dynlib: LibName.}
+proc glfwGetProcAddress*(procname: cstring): Pointer {.stdcall, importc: "glfwGetProcAddress", dynlib: LibName.}
 
-proc GetGLVersion*(major: ptr cint, minor: ptr cint, rev: ptr cint) {.stdcall, importc: "glfwGetGLVersion", dynlib: LibName.}
+proc glfwGetGLVersion*(major: ptr cint, minor: ptr cint, rev: ptr cint) {.stdcall, importc: "glfwGetGLVersion", dynlib: LibName.}
 
-## ---------------------------------------------------------------------------
+
+
 
 ## Threading support
-
 ## ---------------------------------------------------------------------------
 
-proc CreateThread*(fun: TThreadCallback, arg: Pointer): TGlfwThread {.stdcall, importc: "glfwCreateThread", dynlib: LibName.}
+proc glfwCreateThread*(fun: TGlfwThreadCallback, arg: Pointer): TGlfwThread {.stdcall, importc: "glfwCreateThread", dynlib: LibName.}
 
-proc DestroyThread*(thread: TGlfwThread) {.stdcall, importc: "glfwDestroyThread", dynlib: LibName.}
+proc glfwDestroyThread*(thread: TGlfwThread) {.stdcall, importc: "glfwDestroyThread", dynlib: LibName.}
 
-proc WaitThread*(id: TGlfwThread, waitMode: cint): cint {.stdcall, importc: "glfwWaitThread", dynlib: LibName.}
+proc glfwWaitThread*(id: TGlfwThread, waitMode: cint): cint {.stdcall, importc: "glfwWaitThread", dynlib: LibName.}
 
-proc GetThreadID*(): TGlfwThread {.stdcall, importc: "glfwGetThreadID", dynlib: LibName.}
+proc glfwGetThreadID*(): TGlfwThread {.stdcall, importc: "glfwGetThreadID", dynlib: LibName.}
 
-proc CreateMutex*(): TGlfwMutex {.stdcall, importc: "glfwCreateMutex", dynlib: LibName.}
+proc glfwCreateMutex*(): TGlfwMutex {.stdcall, importc: "glfwCreateMutex", dynlib: LibName.}
 
-proc DestroyMutex*(mutexId: TGlfwMutex) {.stdcall, importc: "glfwDestroyThread", dynlib: LibName.}
+proc glfwDestroyMutex*(mutexId: TGlfwMutex) {.stdcall, importc: "glfwDestroyThread", dynlib: LibName.}
 
-proc LockMutex*(mutexId: TGlfwMutex) {.stdcall, importc: "glfwLockMutex", dynlib: LibName.}
+proc glfwLockMutex*(mutexId: TGlfwMutex) {.stdcall, importc: "glfwLockMutex", dynlib: LibName.}
 
-proc UnlockMutex*(mutexId: TGlfwMutex) {.stdcall, importc: "glfwUnlockMutex", dynlib: LibName.}
+proc glfwUnlockMutex*(mutexId: TGlfwMutex) {.stdcall, importc: "glfwUnlockMutex", dynlib: LibName.}
 
-proc CreateCond*(): TGlfwCond {.stdcall, importc: "glfwCreateCond", dynlib: LibName.}
+proc glfwCreateCond*(): TGlfwCond {.stdcall, importc: "glfwCreateCond", dynlib: LibName.}
 
-proc DestroyCond*(condId: TGlfwCond) {.stdcall, importc: "glfwDestroyCond", dynlib: LibName.}
+proc glfwDestroyCond*(condId: TGlfwCond) {.stdcall, importc: "glfwDestroyCond", dynlib: LibName.}
 
-proc WaitCond*(condId: TGlfwCond, mutexId: TGlfwMutex, timeOut: cdouble) {.stdcall, importc: "glfwWaitCond", dynlib: LibName.}
+proc glfwWaitCond*(condId: TGlfwCond, mutexId: TGlfwMutex, timeOut: cdouble) {.stdcall, importc: "glfwWaitCond", dynlib: LibName.}
 
-proc SignalCond*(condId: TGlfwCond) {.stdcall, importc: "glfwSignalCond", dynlib: LibName.}
+proc glfwSignalCond*(condId: TGlfwCond) {.stdcall, importc: "glfwSignalCond", dynlib: LibName.}
 
-proc BroadcastCond*(condId: TGlfwCond) {.stdcall, importc: "glfwBroadcastCond", dynlib: LibName.}
+proc glfwBroadcastCond*(condId: TGlfwCond) {.stdcall, importc: "glfwBroadcastCond", dynlib: LibName.}
 
-proc GetNumberOfProcessors*(): cint {.stdcall, importc: "glfwGetNumberOfProcessors", dynlib: LibName.}
+proc glfwGetNumberOfProcessors*(): cint {.stdcall, importc: "glfwGetNumberOfProcessors", dynlib: LibName.}
 
-## ---------------------------------------------------------------------------
+
 
 
 ## Enable/disable functions
-
 ## ---------------------------------------------------------------------------
 
-proc Enable*(token: cint) {.stdcall, importc: "glfwEnable", dynlib: LibName.}
+proc glfwEnable*(token: cint) {.stdcall, importc: "glfwEnable", dynlib: LibName.}
 
-proc Disable*(token: cint) {.stdcall, importc: "glfwDisable", dynlib: LibName.}
+proc glfwDisable*(token: cint) {.stdcall, importc: "glfwDisable", dynlib: LibName.}
 
-## ---------------------------------------------------------------------------
+
+
 
 ## Image/texture I/O support
-
 ## ---------------------------------------------------------------------------
 
-proc ReadImage*(name: cstring, img: PImage, flags: cint): cint {.stdcall, importc: "glfwReadImage", dynlib: LibName.}
+proc glfwReadImage*(name: cstring, img: PGlfwImage, flags: cint): cint {.stdcall, importc: "glfwReadImage", dynlib: LibName.}
 
-proc ReadMemoryImage*(data: Pointer, size: clong): cint {.stdcall, importc: "glfwReadMemoryImage", dynlib: LibName.}
+proc glfwReadMemoryImage*(data: Pointer, size: clong): cint {.stdcall, importc: "glfwReadMemoryImage", dynlib: LibName.}
 
-proc FreeImage*(img: PImage) {.stdcall, importc: "glfwFreeImage", dynlib: LibName.}
+proc glfwFreeImage*(img: PGlfwImage) {.stdcall, importc: "glfwFreeImage", dynlib: LibName.}
 
-proc LoadTexture2D*(name: cstring, flags: cint): cint {.stdcall, importc: "glfwLoadTexture2D", dynlib: LibName.}
+proc glfwLoadTexture2D*(name: cstring, flags: cint): cint {.stdcall, importc: "glfwLoadTexture2D", dynlib: LibName.}
 
-proc LoadMemoryTexture2D*(data: Pointer, size: clong, flags: cint): cint {.stdcall, importc: "glfwLoadMemoryTexture2D", dynlib: LibName.}
+proc glfwLoadMemoryTexture2D*(data: Pointer, size: clong, flags: cint): cint {.stdcall, importc: "glfwLoadMemoryTexture2D", dynlib: LibName.}
 
-proc LoadTextureImage2D*(img: PImage, flags: cint): cint {.stdcall, importc: "glfwLoadTextureImage2D", dynlib: LibName.}
+proc glfwLoadTextureImage2D*(img: PGlfwImage, flags: cint): cint {.stdcall, importc: "glfwLoadTextureImage2D", dynlib: LibName.}
 
 ## ---------------------------------------------------------------------------
