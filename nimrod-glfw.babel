@@ -1,6 +1,6 @@
 [Package]
 name          = "nimrod-glfw"
-version       = "0.1.2"
+version       = "3.0.4"
 author        = "Rafael Vasco"
 description   = """Nimrod bindings for GLFW library"""
 license       = "MIT" 
