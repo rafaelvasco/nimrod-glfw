@@ -1,7 +1,7 @@
 About nimrod-glfw
 ------------------
 
-This is a [Nimrod] binding for [GLFW] library. 
+This is a [Nimrod] binding for [GLFW3] library. 
 
 To Run:
 -----------------
