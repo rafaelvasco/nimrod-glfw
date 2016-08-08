@@ -1,5 +1,5 @@
 # GLFW3 Bindings/Wrapper for Nimrod
-# Author: Rafael Vasco
+# Authors: Rafael Vasco, Cory Golden
 
 
 {.deadCodeElim: on.}
@@ -11,32 +11,25 @@ elif defined(macosx):
 else:
     const GlfwLib = "libglfw.so.3"
 
-
-# Constants:
-
-# -------------------------------------------------------------------
-# Version
+#[*************************************************************************
+  * GLFW API tokens
+  *************************************************************************]#
 
 const
     VERSION_MAJOR* = 3
-    VERSION_MINOR* = 0
-    VERSION_REVISION* = 4
-    
+    VERSION_MINOR* = 2
+    VERSION_REVISION* = 0
 
-# -------------------------------------------------------------------
-# Key and Button Actions
-
-const
+    TRUE* = 1
+    FALSE* = 0
     RELEASE* = 0
     PRESS* = 1
     REPEAT* = 2
 
-
-# -------------------------------------------------------------------
-# Keyboard Keys
-
-const
+#[ The unknown key ]#
     KEY_UNKNOWN* = - 1
+
+#[ Printable keys ]#
     KEY_SPACE* = 32
     KEY_APOSTROPHE* = 39
     KEY_COMMA* = 44
@@ -87,6 +80,8 @@ const
     KEY_GRAVE_ACCENT* = 96
     KEY_WORLD_1* = 161
     KEY_WORLD_2* = 162
+
+#[ Function keys ]#
     KEY_ESCAPE* = 256
     KEY_ENTER* = 257
     KEY_TAB* = 258
@@ -159,18 +154,11 @@ const
     KEY_MENU* = 348
     KEY_LAST* = KEY_MENU
 
-# ---------------------------------------------------------------------
-# Modifier Key Flags
-const
     MOD_SHIFT* = 0x0001
     MOD_CONTROL* = 0x0002
     MOD_ALT* = 0x0004
     MOD_SUPER* = 0x0008
 
-# ---------------------------------------------------------------------
-# Mouse Buttons
-
-const
     MOUSE_BUTTON_1* = 0
     MOUSE_BUTTON_2* = 1
     MOUSE_BUTTON_3* = 2
@@ -184,10 +172,6 @@ const
     MOUSE_BUTTON_RIGHT* = MOUSE_BUTTON_2
     MOUSE_BUTTON_MIDDLE* = MOUSE_BUTTON_3
 
-#--------------------------------------------------------------------
-# Joysticks
-
-const
     JOYSTICK_1* = 0
     JOYSTICK_2* = 1
     JOYSTICK_3* = 2
@@ -206,10 +190,6 @@ const
     JOYSTICK_16* = 15
     JOYSTICK_LAST* = JOYSTICK_16
 
-# -------------------------------------------------------------------
-# Error Codes
-
-const
     NOT_INITIALIZED* = 0x00010001
     NO_CURRENT_CONTEXT* = 0x00010002
     INVALID_ENUM* = 0x00010003
@@ -219,17 +199,17 @@ const
     VERSION_UNAVAILABLE* = 0x00010007
     PLATFORM_ERROR* = 0x00010008
     FORMAT_UNAVAILABLE* = 0x00010009
+    NO_WINDOW_CONTEXT* = 0x0001000A
 
-
-# -------------------------------------------------------------------
-# Window Attributes
-
-const
     FOCUSED* = 0x00020001
     ICONIFIED* = 0x00020002
     RESIZABLE* = 0x00020003
     VISIBLE* = 0x00020004
     DECORATED* = 0x00020005
+    AUTO_ICONIFY* = 0x00020006
+    FLOATING* = 0x00020007
+    GLFW_MAXIMIZED* = 0x00020008
+
     RED_BITS* = 0x00021001
     GREEN_BITS* = 0x00021002
     BLUE_BITS* = 0x00021003
@@ -245,6 +225,8 @@ const
     SAMPLES* = 0x0002100D
     SRGB_CAPABLE* = 0x0002100E
     REFRESH_RATE* = 0x0002100F
+    DOUBLEBUFFER* = 0x00021010
+
     CLIENT_API* = 0x00022001
     CONTEXT_VERSION_MAJOR* = 0x00022002
     CONTEXT_VERSION_MINOR* = 0x00022003
@@ -253,36 +235,65 @@ const
     OPENGL_FORWARD_COMPAT* = 0x00022006
     OPENGL_DEBUG_CONTEXT* = 0x00022007
     OPENGL_PROFILE* = 0x00022008
+    CONTEXT_RELEASE_BEHAVIOR* = 0x00022009
+    CONTEXT_NO_ERROR* = 0x0002200A
+    CONTEXT_CREATION_API* = 0x0002200B
+
+    NO_API* = 0
     OPENGL_API* = 0x00030001
     OPENGL_ES_API* = 0x00030002
+
     NO_ROBUSTNESS* = 0
     NO_RESET_NOTIFICATION* = 0x00031001
     LOSE_CONTEXT_ON_RESET* = 0x00031002
+
     OPENGL_ANY_PROFILE* = 0
     OPENGL_CORE_PROFILE* = 0x00032001
     OPENGL_COMPAT_PROFILE* = 0x00032002
+
     CURSOR* = 0x00033001
     STICKY_KEYS* = 0x00033002
     STICKY_MOUSE_BUTTONS* = 0x00033003
+
     CURSOR_NORMAL* = 0x00034001
     CURSOR_HIDDEN* = 0x00034002
     CURSOR_DISABLED* = 0x00034003
+
+    ANY_RELEASE_BEHAVIOR* = 0
+    RELEASE_BEHAVIOR_FLUSH* = 0x00035001
+    RELEASE_BEHAVIOR_NONE* = 0x00035002
+
+    NATIVE_CONTEXT_API* = 0x00036001
+    EGL_CONTEXT_API* = 0x00036002
+
+    ARROW_CURSOR* = 0x00036001
+
+    IBEAM_CURSOR* = 0x00036002
+
+    CROSSHAIR_CURSOR* = 0x00036003
+
+    HAND_CURSOR* = 0x00036004
+
+    HRESIZE_CURSOR* = 0x00036005
+
+    VRESIZE_CURSOR* = 0x00036006
+
     CONNECTED* = 0x00040001
     DISCONNECTED* = 0x00040002
 
+    DONT_CARE* = -1
 
-# -------------------------------------------------------------------
-# Types:
+
+#[*************************************************************************
+  * GLFW API types
+  *************************************************************************]#
 
 type
     GLProc* = proc() {.cdecl.}
-
-
-type
-    Window* = pointer
+    VKProc* = proc() {.cdecl.}
     Monitor* = pointer
-
-type
+    Window* = pointer
+    CursorHandle* = pointer
     ErrorFun* = proc (errorCode: cint; description: cstring) {.cdecl.}
     WindowPosFun = proc (window: Window; x: cint; y: cint) {.cdecl.}
     WindowSizeFun* = proc (window: Window; width: cint; height: cint) {.cdecl.}
@@ -297,18 +308,29 @@ type
     ScrollFun* = proc (window: Window; xoffset: cdouble; yoffset: cdouble) {.cdecl.}
     KeyFun* = proc (window: Window; key: cint; scancode: cint; action: cint; modifiers: cint) {.cdecl.}
     CharFun* = proc (window: Window; character: cuint) {.cdecl.}
+    CharModsFun* = proc (window: Window; codepoint: cuint; mods: cint) {.cdecl.}
+    DropFun* = proc (window: Window; count: cint; paths: ptr cstring)
     MonitorFun* = proc (monitor: Monitor; connected: cint) {.cdecl.}
+    JoystickFun* = proc (joy : cint; event: cint)
 
-
-type
     VidMode* {.pure, final.} = object
-        width*, height*, redBits*, greenBits*, blueBits*, refreshRate*: cint
+        width*: cint
+        height*: cint
+        redBits*: cint
+        greenBits*: cint
+        blueBits*: cint
+        refreshRate*: cint
 
-type 
     GammaRamp* {.pure, final.} = object
-        red*, green*,blue*: ptr cushort
+        red*: ptr cushort
+        green*: ptr cushort
+        blue*: ptr cushort
         size*: cuint
 
+    Image* {.pure, final.} = ptr object
+        width: cint
+        height: cint
+        pixels: seq[byte]
 
 # -------------------------------------------------------------------
 # Methods
@@ -337,7 +359,7 @@ proc GetPrimaryMonitor*(): Monitor {.cdecl, importc: "glfwGetPrimaryMonitor", dy
 proc GetMonitorPos*(monitor: Monitor; xpos: ptr cint; ypos: ptr cint) {.cdecl, importc: "glfwGetMonitorPos", dynlib: GlfwLib.}
 
 
-proc GetMonitorPhysicalSize*(monitor: Monitor; width: ptr cint;height: ptr cint) {.cdecl, importc: "glfwGetMonitorPhysicalSize", dynlib: GlfwLib.}
+proc GetMonitorPhysicalSize*(monitor: Monitor; width: ptr cint; height: ptr cint) {.cdecl, importc: "glfwGetMonitorPhysicalSize", dynlib: GlfwLib.}
 
 
 proc GetMonitorName*(monitor: Monitor): cstring {.cdecl, importc: "glfwGetMonitorName", dynlib: GlfwLib.}
@@ -376,10 +398,13 @@ proc DestroyWindow*(window: Window) {.cdecl, importc: "glfwDestroyWindow", dynli
 proc WindowShouldClose*(window: Window): cint {.cdecl, importc: "glfwWindowShouldClose", dynlib: GlfwLib.}
 
 
-proc SetWindowShouldClose*(window: Window; value: cint){.cdecl, importc: "glfwSetWindowShouldClose", dynlib: GlfwLib.}
+proc SetWindowShouldClose*(window: Window; value: cint) {.cdecl, importc: "glfwSetWindowShouldClose", dynlib: GlfwLib.}
 
 
 proc SetWindowTitle*(window: Window; title: cstring) {.cdecl, importc: "glfwSetWindowTitle", dynlib: GlfwLib.}
+
+
+proc SetWindowIcon*(window: Window; count: cint, image: Image) {.cdecl, importc: "glfwSetWindowIcon", dynlib: GlfwLib.}
 
 
 proc GetWindowPos*(window: Window; xpos: ptr cint; ypos: ptr cint) {.cdecl, importc: "glfwGetWindowPos", dynlib: GlfwLib.}
@@ -388,13 +413,22 @@ proc GetWindowPos*(window: Window; xpos: ptr cint; ypos: ptr cint) {.cdecl, impo
 proc SetWindowPos*(window: Window; xpos: cint; ypos: cint) {.cdecl, importc: "glfwSetWindowPos", dynlib: GlfwLib.}
 
 
-proc GetWindowSize*(window: Window; width: ptr cint; height: ptr cint){.cdecl, importc: "glfwGetWindowSize", dynlib: GlfwLib.}
+proc GetWindowSize*(window: Window; width: ptr cint; height: ptr cint) {.cdecl, importc: "glfwGetWindowSize", dynlib: GlfwLib.}
+
+
+proc SetWindowSizeLimits*(window: Window, minwidth, minheight, maxwidth, maxheight: cint) {.cdecl, importc: "glfwSetWindowSizeLimits", dynlib: GlfwLib.}
+
+
+proc SetWindowAspectRatio*(window: Window, numer, denom: cint) {.cdecl, importc: "glfwSetWindowAspectRatio", dynlib: GlfwLib.}
 
 
 proc SetWindowSize*(window: Window; width: cint; height: cint) {.cdecl, importc: "glfwSetWindowSize", dynlib: GlfwLib.}
 
 
-proc GetFramebufferSize*(window: Window; width: ptr cint; height: ptr cint){.cdecl, importc: "glfwGetFramebufferSize", dynlib: GlfwLib.}
+proc GetFramebufferSize*(window: Window; width: ptr cint; height: ptr cint) {.cdecl, importc: "glfwGetFramebufferSize", dynlib: GlfwLib.}
+
+
+proc GetWindowFrameSize*(window: Window, left, top, right, bottom: ptr int) {.cdecl, importc: "glfwGetWindowFrameSize", dynlib: GlfwLib.}
 
 
 proc IconifyWindow*(window: Window) {.cdecl, importc: "glfwIconifyWindow", dynlib: GlfwLib.}
@@ -403,13 +437,22 @@ proc IconifyWindow*(window: Window) {.cdecl, importc: "glfwIconifyWindow", dynli
 proc RestoreWindow*(window: Window) {.cdecl, importc: "glfwRestoreWindow", dynlib: GlfwLib.}
 
 
+proc MaximizeWindow*(window: Window) {.cdecl, importc: "glfwMaximizeWindow", dynlib: GlfwLib.}
+
+
 proc ShowWindow*(window: Window) {.cdecl, importc: "glfwShowWindow", dynlib: GlfwLib.}
 
 
 proc HideWindow*(window: Window) {.cdecl, importc: "glfwHideWindow", dynlib: GlfwLib.}
 
 
+proc FocusWindow*(window: Window) {.cdecl, importc: "glfwFocusWindow", dynlib: GlfwLib.}
+
+
 proc GetWindowMonitor*(window: Window): Monitor {.cdecl, importc: "glfwGetWindowMonitor", dynlib: GlfwLib.}
+
+
+proc SetWindowMonitor*(window: Window, monitor: Monitor, xpos, ypos, width, height: cint) {.cdecl, importc: "glfwSetWindowMonitor", dynlib: GlfwLib.}
 
 
 proc GetWindowAttrib*(window: Window; attrib: cint): cint {.cdecl, importc: "glfwGetWindowAttrib", dynlib: GlfwLib.}
@@ -430,7 +473,7 @@ proc SetWindowSizeCallback*(window: Window; cbfun: WindowSizeFun): WindowSizeFun
 proc SetWindowCloseCallback*(window: Window; cbfun: WindowCloseFun): WindowCloseFun {.cdecl, importc: "glfwSetWindowCloseCallback", dynlib: GlfwLib.}
 
 
-proc SetWindowRefreshCallback*(window: Window;cbfun: Windowrefreshfun): Windowrefreshfun {.cdecl, importc: "glfwSetWindowRefreshCallback", dynlib: GlfwLib.}
+proc SetWindowRefreshCallback*(window: Window; cbfun: Windowrefreshfun): Windowrefreshfun {.cdecl, importc: "glfwSetWindowRefreshCallback", dynlib: GlfwLib.}
 
 
 proc SetWindowFocusCallback*(window: Window; cbfun: WindowFocusFun): WindowFocusFun {.cdecl, importc: "glfwSetWindowFocusCallback", dynlib: GlfwLib.}
@@ -448,6 +491,12 @@ proc PollEvents*() {.cdecl, importc: "glfwPollEvents", dynlib: GlfwLib.}
 proc WaitEvents*() {.cdecl, importc: "glfwWaitEvents", dynlib: GlfwLib.}
 
 
+proc WaitEventsTimeout*(timeout: cdouble) {.cdecl, importc: "glfwWaitEventsTimeout", dynlib: GlfwLib.}
+
+
+proc PostEmptyEvent*() {.cdecl, importc: "glfwPostEmptyEvent", dynlib: GlfwLib.}
+
+
 proc GetInputMode*(window: Window; mode: cint): cint {.cdecl, importc: "glfwGetInputMode", dynlib: GlfwLib.}
 
 
@@ -460,16 +509,31 @@ proc GetKey*(window: Window; key: cint): cint {.cdecl, importc: "glfwGetKey", dy
 proc GetMouseButton*(window: Window; button: cint): cint {.cdecl, importc: "glfwGetMouseButton", dynlib: GlfwLib.}
 
 
-proc GetCursorPos*(window: Window; xpos: ptr cdouble; ypos: ptr cdouble){.cdecl, importc: "glfwGetCursorPos", dynlib: GlfwLib.}
+proc GetCursorPos*(window: Window; xpos: ptr cdouble; ypos: ptr cdouble) {.cdecl, importc: "glfwGetCursorPos", dynlib: GlfwLib.}
 
 
 proc SetCursorPos*(window: Window; xpos: cdouble; ypos: cdouble) {.cdecl, importc: "glfwSetCursorPos", dynlib: GlfwLib.}
+
+
+proc CreateCursor*(image: Image, xhot, yhot: cint): CursorHandle {.cdecl, importc: "glfwCreateCursor", dynlib: GlfwLib.}
+
+
+proc CreateStandardCursor*(shape: cint): CursorHandle {.cdecl, importc: "glfwCreateStandardCursor", dynlib: GlfwLib.}
+
+
+proc DestroyCursor*(cusor: CursorHandle) {.cdecl, importc: "glfwDestroyCursor", dynlib: GlfwLib.}
+
+
+proc SetCursor*(window: Window; cursor: CursorHandle) {.cdecl, importc: "glfwSetCursor", dynlib: GlfwLib.}
 
 
 proc SetKeyCallback*(window: Window; cbfun: KeyFun): KeyFun {.cdecl, importc: "glfwSetKeyCallback", dynlib: GlfwLib.}
 
 
 proc SetCharCallback*(window: Window; cbfun: CharFun): CharFun {.cdecl, importc: "glfwSetCharCallback", dynlib: GlfwLib.}
+
+
+proc SetCharModsCallback*(window: Window, cbfun: CharModsFun): CharModsFun {.cdecl, importc: "glfwSetCharModsCallback", dynlib: GlfwLib.}
 
 
 proc SetMouseButtonCallback*(window: Window; cbfun: MouseButtonFun): MouseButtonFun {.cdecl, importc: "glfwSetMouseButtonCallback", dynlib: GlfwLib.}
@@ -484,22 +548,28 @@ proc SetCursorEnterCallback*(window: Window; cbfun: CursorEnterFun): CursorEnter
 proc SetScrollCallback*(window: Window; cbfun: ScrollFun): ScrollFun {.cdecl, importc: "glfwSetScrollCallback", dynlib: GlfwLib.}
 
 
+proc SetDropCallback*(window: Window, cbfun: DropFun) {.cdecl, importc: "glfwSetDropCallback", dynlib: GlfwLib.}
+
+
 proc JoystickPresent*(joy: cint): cint {.cdecl, importc: "glfwJoystickPresent", dynlib: GlfwLib.}
 
 
-proc GetJoystickAxes*(joy: cint; count: ptr cint): ptr cfloat {.cdecl,importc: "glfwGetJoystickAxes", dynlib: GlfwLib.}
+proc GetJoystickAxes*(joy: cint; count: ptr cint): ptr cfloat {.cdecl, importc: "glfwGetJoystickAxes", dynlib: GlfwLib.}
 
 
-proc GetJoystickButtons*(joy: cint; count: ptr cint): ptr cuchar {.cdecl,importc: "glfwGetJoystickButtons", dynlib: GlfwLib.}
+proc GetJoystickButtons*(joy: cint; count: ptr cint): ptr cuchar {.cdecl, importc: "glfwGetJoystickButtons", dynlib: GlfwLib.}
 
 
-proc GetJoystickName*(joy: cint): cstring {.cdecl,importc: "glfwGetJoystickName", dynlib: GlfwLib.}
+proc GetJoystickName*(joy: cint): cstring {.cdecl, importc: "glfwGetJoystickName", dynlib: GlfwLib.}
+
+
+proc SetJoystickCallback*(cbfun: JoystickFun): JoystickFun {.cdecl, importc: "glfwSetJoystickCallback", dynlib: GlfwLib.}
 
 
 proc SetClipboardString*(window: Window; string: cstring) {.cdecl, importc: "glfwSetClipboardString", dynlib: GlfwLib.}
 
 
-proc GetClipboardString*(window: Window): cstring {.cdecl,importc: "glfwGetClipboardString", dynlib: GlfwLib.}
+proc GetClipboardString*(window: Window): cstring {.cdecl, importc: "glfwGetClipboardString", dynlib: GlfwLib.}
 
 
 proc GetTime*(): cdouble {.cdecl, importc: "glfwGetTime", dynlib: GlfwLib.}
@@ -508,10 +578,16 @@ proc GetTime*(): cdouble {.cdecl, importc: "glfwGetTime", dynlib: GlfwLib.}
 proc SetTime*(time: cdouble) {.cdecl, importc: "glfwSetTime", dynlib: GlfwLib.}
 
 
-proc MakeContextCurrent*(window: Window) {.cdecl,importc: "glfwMakeContextCurrent", dynlib: GlfwLib.}
+proc GetTimerValue*(): culonglong {.cdecl, importc: "glfwGetTimerValue", dynlib: GlfwLib.}
 
 
-proc GetCurrentContext*(): Window {.cdecl,importc: "glfwGetCurrentContext", dynlib: GlfwLib.}
+proc GetTimerFrequency*(): culonglong {.cdecl, importc: "glfwGetTimerFrequency", dynlib: GlfwLib.}
+
+
+proc MakeContextCurrent*(window: Window) {.cdecl, importc: "glfwMakeContextCurrent", dynlib: GlfwLib.}
+
+
+proc GetCurrentContext*(): Window {.cdecl, importc: "glfwGetCurrentContext", dynlib: GlfwLib.}
 
 
 proc SwapBuffers*(window: Window) {.cdecl, importc: "glfwSwapBuffers", dynlib: GlfwLib.}
@@ -524,3 +600,46 @@ proc ExtensionSupported*(extension: cstring): cint {.cdecl, importc: "glfwExtens
 
 
 proc GetProcAddress*(procname: cstring): GLProc {.cdecl, importc: "glfwGetProcAddress", dynlib: GlfwLib.}
+
+
+proc VulkanSupported*(): cint {.cdecl, importc: "glfwVulkanSupported", dynlib: GlfwLib.}
+
+
+proc GetRequiredInstanceExtensions*(count: ptr cuint): ptr cstring {.cdecl, importc: "glfwGetRequiredInstanceExtensions", dynlib: GlfwLib.}
+
+when not defined(VkInstance):
+    type VkInstance* = pointer
+when not defined(VkPhysicalDevice):
+    type VkPhysicalDevice* = pointer
+when not defined(VkAllocationCallbacks):
+    type VkAllocationCallbacks* = pointer
+when not defined(VkSurfaceKHR):
+    type VkSurfaceKHR* = pointer
+when not defined(VkResult):
+    type VkResult* = enum
+        VK_ERROR_FRAGMENTED_POOL = -12
+        VK_ERROR_FORMAT_NOT_SUPPORTED = -11
+        VK_ERROR_TOO_MANY_OBJECTS = -10
+        VK_ERROR_INCOMPATIBLE_DRIVER = -9
+        VK_ERROR_FEATURE_NOT_PRESENT = -8
+        VK_ERROR_EXTENSION_NOT_PRESENT = -7
+        VK_ERROR_LAYER_NOT_PRESENT = -6
+        VK_ERROR_MEMORY_MAP_FAILED = -5
+        VK_ERROR_DEVICE_LOST = -4
+        VK_ERROR_INITIALIZATION_FAILED = -3
+        VK_ERROR_OUT_OF_DEVICE_MEMORY = -2
+        VK_ERROR_OUT_OF_HOST_MEMORY = -1
+        VK_SUCCESS = 0
+        VK_NOT_READY = 1
+        VK_TIMEOUT = 2
+        VK_EVENT_SET = 3
+        VK_EVENT_RESET = 4
+        VK_INCOMPLETE = 5
+
+proc GetInstanceProcAddress*(instance: VkInstance, procname: cstring): VKProc {.cdecl, importc: "glfwGetInstanceProcAddress", dynlib: GlfwLib.}
+
+
+proc GetPhysicalDevicePresentationSupport*(instance: VkInstance, device: VkPhysicalDevice, queuefamily: cuint): cint {.cdecl, importc: "glfwGetPhysicalDevicePresentationSupport", dynlib: GlfwLib.}
+
+
+proc CreateWindowSurface*(instance: VkInstance, window: Window, allocator: ptr VkAllocationCallbacks, surface: ptr VkSurfaceKHR): VkResult {.cdecl, importc: "glfwCreateWindowSurface", dynlib: GlfwLib.}
