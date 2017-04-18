@@ -1,12 +1,10 @@
 import glfw3 as glfw
  
-
-
 if glfw.Init() == 0:
-    raise newException(E_base, "Failed to initialize GLFW")
+    raise newException(Exception, "Failed to Initialize GLFW")
 
 
-var window = glfw.CreateWindow(800, 600, "GLFW WINDOW", nil, nil)
+var window = glfw.CreateWindow(800, 600, "GLFW3 WINDOW", nil, nil)
 
 glfw.MakeContextCurrent(window)
 

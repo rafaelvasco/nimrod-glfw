@@ -1,15 +1,17 @@
 About nimrod-glfw
 ------------------
 
-This is a [Nimrod] binding for [GLFW3] library. 
+This is a [Nim] binding for [GLFW3] library. 
+
+Current Version: 3.2.0
 
 To Run:
 -----------------
 
-1. Have [Nimrod] installed first. Instructions are [here].
-2. Run `nimrod c -d:release glfwtest.nim` on your terminal of choice. Tested on Windows and Linux
+1. Have [Nim] installed first. Instructions are [here].
+2. Give it a try: `cd test, then nim c -d:release --app:gui glfwtest.nim` on your terminal of choice. Tested on Windows and Linux
 3. Profit !
 
-[Nimrod]: http://nimrod-code.org/  
+[Nim]: https://nim-lang.org
 [GLFW]: http://glfw.org
-[here]: http://nimrod-code.org/download.html
+[here]: https://nim-lang.org/download.html
