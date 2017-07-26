@@ -7,7 +7,7 @@ import glfw3
 when defined(Windows):
     const GlfwLib = "glfw3.dll"
 elif defined(MacOSX):
-    const GlfwLib = "libglfw3.dylib"
+    const GlfwLib = "libglfw.3.dylib"
 else:
     const GlfwLib = "libglfw.so.3"
 
